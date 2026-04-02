@@ -1,47 +1,22 @@
-import { useEffect, useState } from 'react';
 import { formatTime, getDynamicColor } from '../utils';
+import * as dashboard from '@lark-base-open/js-sdk';
 
-const isDashboardEnv = !!window.dashboard;
+interface IndicatorCardProps {
+  data: number;
+  config: dashboard.IConfig;
+}
 
-export default function IndicatorCard({ data }: { data: number }) {
-  const [config, setConfig] = useState<any>({
-    format: 'TEXT',
-    condition: '>',
-    threshold: 60,
-    targetColor: 'red'
-  });
+export default function IndicatorCard({ data, config }: IndicatorCardProps) {
+  const format = config.format || 'TEXT';
+  const condition = config.condition || '>';
+  const threshold = config.threshold || 60;
+  const targetColor = config.targetColor || 'red';
 
-  useEffect(() => {
-    if (!isDashboardEnv) return;
-    window.dashboard.getConfig().then((res: any) => {
-      if (res) setConfig(res);
-    });
-    const off = window.dashboard.onConfigChange(() => {
-      window.dashboard.getConfig().then((res: any) => {
-        if (res) setConfig(res);
-      });
-    });
-    return () => off?.();
-  }, []);
-
-  const finalColor = getDynamicColor(
-    data,
-    config.condition,
-    config.threshold,
-    config.targetColor,
-    '#000'
-  );
+  const finalColor = getDynamicColor(data, condition, threshold, targetColor, '#000');
 
   return (
-    <div style={{
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      height: '100%'
-    }}>
-      <div style={{ fontSize: 48, fontWeight: 'bold', color: finalColor }}>
-        {formatTime(data, config.format)}
-      </div>
+    <div style={{ fontSize: '48px', fontWeight: 'bold', color: finalColor }}>
+      {formatTime(data, format)}
     </div>
   );
 }
