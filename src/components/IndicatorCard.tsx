@@ -1,19 +1,18 @@
 import { useEffect, useState } from 'react';
-import { bitable } from '@lark-base-open/js-sdk';
 import { formatTime, getDynamicColor } from '../utils';
 
-const isLocalPreview = !window.lark?.bitable;
+const isLocalPreview = !window.lark;
 
 export default function IndicatorCard({ data }: { data: number }) {
   const [config, setConfig] = useState<any>({});
 
   useEffect(() => {
     if (isLocalPreview) return;
-    bitable.dashboard.getConfig().then((res) => setConfig(res || {})).catch(() => {});
-    const off = bitable.dashboard.onConfigChange(() => {
-      bitable.dashboard.getConfig().then((res) => setConfig(res || {}));
+    window.dashboard?.getConfig().then((res: any) => setConfig(res || {}));
+    const off = window.dashboard?.onConfigChange(() => {
+      window.dashboard?.getConfig().then((res: any) => setConfig(res || {}));
     });
-    return () => off();
+    return () => off?.();
   }, []);
 
   const displayValue = isLocalPreview ? 75 : data;
