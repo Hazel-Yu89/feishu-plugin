@@ -4,15 +4,25 @@ import IndicatorCard from './components/IndicatorCard';
 import * as dashboard from '@lark-base-open/js-sdk';
 
 export default function App() {
-  const [data, setData] = useState<number>(0);
-  const [config, setConfig] = useState<dashboard.IConfig>({} as dashboard.IConfig);
+  const [data, setData] = useState<number>(75);
+  const [config, setConfig] = useState({
+    format: 'TEXT',
+    condition: '>',
+    threshold: 60,
+    targetColor: 'red'
+  });
 
-  // 飞书SDK标准初始化
+  const isDashboardEnv = !!window.dashboard;
+
   useEffect(() => {
-    // 初始化SDK
+    if (!isDashboardEnv) return;
+
     dashboard.ready(() => {
-      console.log('SDK初始化成功');
-      
+      // 初始化配置
+      dashboard.getConfig().then(res => {
+        if (res) setConfig(res as any);
+      });
+
       // 监听数据变化
       const offData = dashboard.onDataChange(async () => {
         try {
@@ -30,11 +40,8 @@ export default function App() {
       // 监听配置变化
       const offConfig = dashboard.onConfigChange(async () => {
         const res = await dashboard.getConfig();
-        setConfig(res);
+        if (res) setConfig(res as any);
       });
-
-      // 初始化配置
-      dashboard.getConfig().then(res => setConfig(res));
 
       return () => {
         offData();
@@ -48,7 +55,7 @@ export default function App() {
       <div style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
         <IndicatorCard data={data} config={config} />
       </div>
-      <div style={{ width: '340px', borderLeft: '1px solid var(--color-border)', padding: '16px', overflowY: 'auto' }}>
+      <div style={{ width: '340px', borderLeft: '1px solid #eee', padding: '16px', overflowY: 'auto' }}>
         <ConfigPanel config={config} onConfigChange={setConfig} />
       </div>
     </div>
