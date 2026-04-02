@@ -13,11 +13,9 @@ export default function IndicatorCard({ data }: { data: number }) {
 
   useEffect(() => {
     if (!isDashboardEnv) return;
-    // 飞书环境：获取配置
     window.dashboard.getConfig().then((res: any) => {
       if (res) setConfig(res);
     });
-    // 监听配置变化
     const off = window.dashboard.onConfigChange(() => {
       window.dashboard.getConfig().then((res: any) => {
         if (res) setConfig(res);
@@ -26,23 +24,23 @@ export default function IndicatorCard({ data }: { data: number }) {
     return () => off?.();
   }, []);
 
-  const displayValue = data;
-  const format = config.format || 'TEXT';
-  const condition = config.condition || '>';
-  const threshold = config.threshold || 60;
-  const targetColor = config.targetColor || 'red';
-  const finalColor = getDynamicColor(displayValue, condition, threshold, targetColor, '#000');
+  const finalColor = getDynamicColor(
+    data,
+    config.condition,
+    config.threshold,
+    config.targetColor,
+    '#000'
+  );
 
   return (
-    <div style={{ 
-      display: 'flex', 
-      flexDirection: 'column', 
-      justifyContent: 'center', 
-      alignItems: 'center', 
-      height: '100%' 
+    <div style={{
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      height: '100%'
     }}>
-      <div style={{ fontSize: '48px', fontWeight: 'bold', color: finalColor }}>
-        {formatTime(displayValue, format)}
+      <div style={{ fontSize: 48, fontWeight: 'bold', color: finalColor }}>
+        {formatTime(data, config.format)}
       </div>
     </div>
   );
