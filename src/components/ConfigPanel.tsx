@@ -1,24 +1,24 @@
 import { useEffect, useState } from 'react';
-import { bitable } from '@lark-base-open/js-sdk';
 import { Form, Select } from '@douyinfe/semi-ui';
 
 export default function ConfigPanel() {
   const [config, setConfig] = useState<any>({});
 
   useEffect(() => {
-    bitable.dashboard.getConfig().then((res) => setConfig(res || {})).catch(() => {});
+    if (!window.dashboard) return;
+    window.dashboard.getConfig().then((res: any) => setConfig(res || {}));
   }, []);
 
   const handleValuesChange = (values: any) => {
     const newConfig = { ...config, ...values };
     setConfig(newConfig);
-    bitable.dashboard.saveConfig(newConfig);
+    window.dashboard?.setConfig(newConfig);
   };
 
   return (
     <div style={{ padding: 16 }}>
       <h3>指标卡设置</h3>
-      <Form initValues={config} onValueChange={handleValuesChange}>
+      <Form initValues={config} onValuesChange={handleValuesChange}>
         <Form.Select field="format" label="显示格式" initValue="TEXT">
           <Select.Option value="TEXT">纯数字</Select.Option>
           <Select.Option value="MM:SS">分:秒</Select.Option>
