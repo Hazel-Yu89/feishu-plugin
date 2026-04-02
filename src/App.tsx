@@ -26,7 +26,7 @@ export default function App() {
     targetColor: 'red'
   });
   // 核心：通过飞书SDK判断是否为编辑模式
-  const [isEditor, setIsEditor] = useState(false);
+  const [isEditor, setIsEditor] = useState(true);
 
   const isDashboardEnv = !!window.dashboard;
 
