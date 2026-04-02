@@ -1,7 +1,20 @@
 import { useEffect, useState } from 'react';
 import ConfigPanel from './components/ConfigPanel';
 import IndicatorCard from './components/IndicatorCard';
-import * as dashboard from '@lark-base-open/js-sdk';
+
+// 飞书SDK会在飞书环境自动注入，这里只做类型声明
+declare global {
+  interface Window {
+    dashboard?: {
+      ready: (cb: () => void) => void;
+      onDataChange: (cb: () => Promise<void>) => () => void;
+      onConfigChange: (cb: () => Promise<void>) => () => void;
+      getConfig: () => Promise<any>;
+      setConfig: (config: any) => void;
+      query: () => Promise<any>;
+    };
+  }
+}
 
 export default function App() {
   const [data, setData] = useState<number>(75);
@@ -17,16 +30,16 @@ export default function App() {
   useEffect(() => {
     if (!isDashboardEnv) return;
 
-    dashboard.ready(() => {
+    window.dashboard!.ready(() => {
       // 初始化配置
-      dashboard.getConfig().then(res => {
+      window.dashboard!.getConfig().then(res => {
         if (res) setConfig(res as any);
       });
 
       // 监听数据变化
-      const offData = dashboard.onDataChange(async () => {
+      const offData = window.dashboard!.onDataChange(async () => {
         try {
-          const res = await dashboard.query({});
+          const res = await window.dashboard!.query({});
           if (res?.data?.list?.length > 0) {
             const firstField = Object.keys(res.data.list[0])[0];
             const value = Number(res.data.list[0][firstField]);
@@ -38,8 +51,8 @@ export default function App() {
       });
 
       // 监听配置变化
-      const offConfig = dashboard.onConfigChange(async () => {
-        const res = await dashboard.getConfig();
+      const offConfig = window.dashboard!.onConfigChange(async () => {
+        const res = await window.dashboard!.getConfig();
         if (res) setConfig(res as any);
       });
 
