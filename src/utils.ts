@@ -8,10 +8,7 @@ export function formatTime(value: number, format: string): string {
   const pad = (n: number) => n.toString().padStart(2, '0');
 
   if (format === 'HH:MM:SS') return `${pad(h)}:${pad(m)}:${pad(s)}`;
-  if (format === 'MM:SS') {
-    const totalMinutes = Math.floor(value / 60);
-    return `${pad(totalMinutes)}:${pad(s)}`;
-  }
+  if (format === 'MM:SS') return `${pad(m)}:${pad(s)}`;
   return String(value);
 }
 
