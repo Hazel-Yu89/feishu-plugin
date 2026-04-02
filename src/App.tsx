@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import ConfigPanel from './components/ConfigPanel';
 import IndicatorCard from './components/IndicatorCard';
 
-// 飞书SDK会在飞书环境自动注入，这里只做类型声明
+// 飞书环境全局类型声明
 declare global {
   interface Window {
     dashboard?: {
@@ -12,6 +12,7 @@ declare global {
       getConfig: () => Promise<any>;
       setConfig: (config: any) => void;
       query: () => Promise<any>;
+      isEditor: boolean; // 飞书原生：编辑模式标识
     };
   }
 }
@@ -24,6 +25,8 @@ export default function App() {
     threshold: 60,
     targetColor: 'red'
   });
+  // 核心：通过飞书SDK判断是否为编辑模式
+  const [isEditor, setIsEditor] = useState(false);
 
   const isDashboardEnv = !!window.dashboard;
 
@@ -31,6 +34,9 @@ export default function App() {
     if (!isDashboardEnv) return;
 
     window.dashboard!.ready(() => {
+      // 飞书原生API：获取编辑模式状态
+      setIsEditor(window.dashboard!.isEditor);
+
       // 初始化配置
       window.dashboard!.getConfig().then(res => {
         if (res) setConfig(res as any);
@@ -64,13 +70,35 @@ export default function App() {
   }, []);
 
   return (
-    <div style={{ display: 'flex', height: '100vh', width: '100vw' }}>
-      <div style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+    <div style={{ 
+      display: 'flex', 
+      height: '100vh', 
+      width: '100vw',
+      overflow: 'hidden'
+    }}>
+      {/* 左侧：指标卡，始终全屏展示 */}
+      <div style={{ 
+        flex: 1, 
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center',
+        background: '#fff'
+      }}>
         <IndicatorCard data={data} config={config} />
       </div>
-      <div style={{ width: '340px', borderLeft: '1px solid #eee', padding: '16px', overflowY: 'auto' }}>
-        <ConfigPanel config={config} onConfigChange={setConfig} />
-      </div>
+
+      {/* 右侧：设置面板，仅编辑模式可见，查看模式自动隐藏 */}
+      {isEditor && (
+        <div style={{ 
+          width: '340px', 
+          borderLeft: '1px solid #eee', 
+          padding: '16px', 
+          overflowY: 'auto',
+          background: '#f8f9fa'
+        }}>
+          <ConfigPanel config={config} onConfigChange={setConfig} />
+        </div>
+      )}
     </div>
   );
 }
